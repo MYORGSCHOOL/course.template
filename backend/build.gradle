@@ -21,6 +21,10 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('co.elastic.logging:logback-ecs-encoder:1.5.0')
     implementation('org.apache.commons:commons-lang3:3.12.0')
+    implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:2.7.17")
+    implementation("ma.glasnost.orika:orika-core:1.5.4")
+    implementation("org.liquibase:liquibase-core:4.19.0")
 
     compileOnly("org.projectlombok:lombok:1.18.28")
     annotationProcessor("org.projectlombok:lombok:1.18.28")
@@ -29,7 +33,6 @@ dependencies {
 
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 }
-
 
 test {
     include('ru/template/example/**')
