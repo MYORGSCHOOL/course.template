@@ -14,10 +14,10 @@ export default function DocumentDetails(props) {
     const fields = () => (
         <div >
             <div>
-                <FieldInputText name='type' label='Наименование' required/>
+                <FieldInputText name='type' label='Вид документа' required/>
             </div>
             <div>
-                <FieldInputText style={{display: "block"}} name='organization' label='Организация' required/>
+                <FieldInputText style={{display: "block"}} name='organization' label='Медицинская организация' required/>
             </div>
             <div>
                 <FieldInputText style={{display: "block"}} name='description' label='Описание документа' required/>

@@ -1,78 +1,117 @@
 package ru.template.example.documents.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import org.apache.commons.lang3.RandomUtils;
-import org.springframework.stereotype.Service;
-import ru.template.example.documents.controller.dto.DocumentDto;
-import ru.template.example.documents.controller.dto.Status;
-import ru.template.example.documents.repository.DocumentRepository;
-import ru.template.example.documents.store.DocumentStore;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import ru.template.example.controller.dto.DocumentDto;
+import ru.template.example.documents.repository.DocumentRepository;
+import ru.template.example.documents.repository.StatusRepository;
+import ru.template.example.documents.repository.entity.DocumentsEntity;
+import ru.template.example.documents.repository.entity.StatusEntity;
+import ru.template.example.exception.DocumentIllegalStatusException;
+import ru.template.example.exception.DocumentNotFoundException;
+import ru.template.example.exception.NotFoundStatus;
 
+import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Lazy
+@Slf4j
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
+    private final StatusRepository statusRepository;
+    private final kafkaSender kafkaSender;
+
     private final MapperFacade mapperFacade = new DefaultMapperFactory
             .Builder()
             .build()
             .getMapperFacade();
+
+    /**
+     * Сохранение документа
+     *
+     * @param documentDto документ
+     * @return документ
+     */
+    @Transactional
     public DocumentDto save(DocumentDto documentDto) {
-        if (documentDto.getId() == null) {
-            documentDto.setId(RandomUtils.nextLong(0L, 999L));
-        }
-        documentDto.setDate(new Date());
-        if (documentDto.getStatus() == null) {
-            documentDto.setStatus(Status.of("NEW", "Новый"));
-        }
-        DocumentStore.getInstance().getDocumentDtos().add(documentDto);
-        return documentDto;
+        DocumentsEntity document = mapperFacade.map(documentDto, DocumentsEntity.class);
+        Optional<StatusEntity> status = statusRepository.findByCode("NEW");
+        document.setStatus(status.orElseThrow(()->new NotFoundStatus("Статус не найден")));
+        document.setDate(Date.from(Instant.now()));
+        documentRepository.save(document);
+        return mapperFacade.map(document, DocumentDto.class);
     }
 
-
+    /**
+     * Обновить документ и отправить в кафку
+     *
+     * @param documentDto документ
+     * @return документ
+     */
+    @Transactional
     public DocumentDto update(DocumentDto documentDto) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        Optional<DocumentDto> dto = documentDtos.stream()
-                .filter(d -> d.getId().equals(documentDto.getId())).findFirst();
-        if (dto.isPresent()) {
-            delete(documentDto.getId());
-            save(documentDto);
+        long id = documentDto.getId();
+        DocumentsEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException("Документ не найден."));
+        if (document.getStatus().equals("NEW")) {
+            throw new DocumentIllegalStatusException("Неверный статус документа.");
         }
+        kafkaSender.sendMessage(documentDto);
+        Optional<StatusEntity> status = statusRepository.findByCode("IN_PROCESS");
+        documentRepository.updateStatusById(status.orElseThrow(()->new NotFoundStatus("Статус не найден")), documentDto.getId());
         return documentDto;
     }
 
+    /**
+     * Удаление одного документа по id
+     *
+     * @param id идентификатор документа
+     */
+    @Transactional
     public void delete(Long id) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        List<DocumentDto> newList = documentDtos.stream()
-                .filter(d -> !d.getId().equals(id)).collect(Collectors.toList());
-        documentDtos.clear();
-        documentDtos.addAll(newList);
+        documentRepository.deleteById(id);
     }
 
+    /**
+     * Удаление нескольких документов
+     *
+     * @param ids идентификаторы документов
+     */
+    @Transactional
     public void deleteAll(Set<Long> ids) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        List<DocumentDto> newList = documentDtos.stream()
-                .filter(d -> !ids.contains(d.getId())).collect(Collectors.toList());
-        documentDtos.clear();
-        documentDtos.addAll(newList);
+        ids.forEach(this::delete);
     }
 
+    /**
+     * Получение списка всех документов
+     *
+     * @return список документов
+     */
+    @Transactional
     public List<DocumentDto> findAll() {
-        return DocumentStore.getInstance().getDocumentDtos();
+        List<DocumentsEntity> document = documentRepository.findAll();
+        return mapperFacade.mapAsList(document, DocumentDto.class);
     }
 
+    /**
+     * Получение документа по id
+     *
+     * @param id идентификатор документа
+     * @return документ
+     */
+    @Transactional
     public DocumentDto get(Long id) {
-        List<DocumentDto> documentDtos = DocumentStore.getInstance().getDocumentDtos();
-        return documentDtos.stream()
-                .filter(d -> d.getId().equals(id)).findFirst().get();
+        Optional<DocumentsEntity> document = documentRepository.findById(id);
+        return mapperFacade.map(document.orElseThrow(()->new DocumentNotFoundException("Документ не найден.")), DocumentDto.class);
     }
 }

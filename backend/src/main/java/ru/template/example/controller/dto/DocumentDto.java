@@ -1,10 +1,12 @@
-package ru.template.example.documents.controller.dto;
+package ru.template.example.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -19,18 +21,22 @@ public class DocumentDto {
     /**
      * Вид документа
      */
+    @NotNull
     private String type;
     /**
      * Организация
      */
+    @NotNull
     private String organization;
     /**
      * Описание
      */
+    @NotNull
     private String description;
     /**
      * Пациент
      */
+    @NotNull
     private String patient;
     /**
      * Дата документа
@@ -39,6 +45,7 @@ public class DocumentDto {
     /**
      * Статус
      */
+    @Valid
     private Status status;
 
 }

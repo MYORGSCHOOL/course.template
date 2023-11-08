@@ -9,9 +9,9 @@ import Loader from "../Loader";
 const headCells = [
     { property: 'id', disablePadding: true, label: 'Номер' },
     { property: 'type', disablePadding: true, label: 'Вид документа' },
-    { property: 'organization', numeric: true, disablePadding: false, label: 'Организация' },
+    { property: 'organization', numeric: true, disablePadding: false, label: 'Медицинская организация' },
     { property: 'date', numeric: true, disablePadding: false, label: 'Дата' },
-    { property: 'description', numeric: true, disablePadding: false, label: 'Описание' },
+    { property: 'description', numeric: true, disablePadding: false, label: 'Описание документа' },
     { property: 'patient', numeric: true, disablePadding: false, label: 'Пациент' },
     { property: 'status', numeric: true, disablePadding: false, label: 'Статус' }
 ];

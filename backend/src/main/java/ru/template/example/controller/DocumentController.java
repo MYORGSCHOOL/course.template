@@ -1,20 +1,15 @@
-package ru.template.example.documents.controller;
+package ru.template.example.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.template.example.documents.controller.dto.DocumentDto;
-import ru.template.example.documents.controller.dto.IdDto;
-import ru.template.example.documents.controller.dto.IdsDto;
-import ru.template.example.documents.controller.dto.Status;
+import org.springframework.web.bind.annotation.*;
+import ru.template.example.controller.dto.DocumentDto;
+import ru.template.example.controller.dto.IdDto;
+import ru.template.example.controller.dto.IdsDto;
+import ru.template.example.controller.dto.Status;
 import ru.template.example.documents.service.DocumentService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -27,7 +22,7 @@ public class DocumentController {
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DocumentDto save(@RequestBody DocumentDto dto) {
+    public DocumentDto save(@Valid @RequestBody DocumentDto dto) {
         return service.save(dto);
     }
 
