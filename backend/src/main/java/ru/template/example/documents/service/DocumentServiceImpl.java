@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +78,12 @@ public class DocumentServiceImpl implements DocumentService {
         return mapperFacade.map(document.get(), DocumentDto.class);
     }
 
+
+    /**
+     * Добавить сообщения с документом в табличку для отправки сообщений
+     *
+     * @param documentDto документ
+     */
     private void addToTableForKafkaSender(DocumentDto documentDto) {
         MessageForKafkaEntity message = new MessageForKafkaEntity();
         try {

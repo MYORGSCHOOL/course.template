@@ -17,19 +17,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.template.example.configuration.JacksonConfiguration;
 import ru.template.example.documents.controller.dto.DocumentDto;
+import ru.template.example.documents.controller.dto.IdsDto;
 import ru.template.example.documents.service.DocumentServiceImpl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class DocumentControllerTest {
+    //TODO: Разобраться в этом
     private static final String BASE_PATH = "/documents";
 
     private final ObjectMapper mapper = new JacksonConfiguration().objectMapper();
@@ -53,12 +57,12 @@ public class DocumentControllerTest {
 
         when(service.save(any())).thenReturn(any());
 
-        var cityDto = new DocumentDto();
-        cityDto.setId(5L);
-        cityDto.setOrganization(organization);
-        mockMvc.perform(postAction(BASE_PATH, cityDto)).andExpect(status().isOk());
+        var documentDto = new DocumentDto();
+        documentDto.setId(5L);
+        documentDto.setOrganization(organization);
+        mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().isOk());
 
-        Mockito.verify(service, Mockito.times(1)).save(cityDto);
+        Mockito.verify(service, Mockito.times(1)).save(documentDto);
     }
 
     @Test
@@ -68,14 +72,21 @@ public class DocumentControllerTest {
 
         when(service.save(any())).thenThrow(new IllegalStateException("Это слишком!"));
 
-        var cityDto = new DocumentDto();
-        cityDto.setId(5L);
-        cityDto.setOrganization(organization);
-        mockMvc.perform(postAction(BASE_PATH, cityDto)).andExpect(status().is5xxServerError());
+        var documentDto = new DocumentDto();
+        documentDto.setId(5L);
+        documentDto.setOrganization(organization);
+        mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().is5xxServerError());
     }
 
     @Test
     public void getTest() throws Exception {
+        when(service.findAll()).thenReturn(anyList());
+
+        var organization = randomAlphabetic(100);
+        var documentDto = new DocumentDto();
+        documentDto.setId(5L);
+        documentDto.setOrganization(organization);
+        // Mockito.verify(service, Mockito.times(1)).save(documentDto);
         mockMvc.perform(getAction(BASE_PATH)).andExpect(status().is2xxSuccessful());
     }
 
@@ -100,6 +111,7 @@ public class DocumentControllerTest {
         var name = randomAlphabetic(1000);
         var description = randomAlphabetic(1000);
         var type = randomAlphabetic(1000);
+        var id = 5L;
 
         var documentDto = new DocumentDto();
         documentDto.setId(5L);
@@ -109,12 +121,35 @@ public class DocumentControllerTest {
         documentDto.setDescription(description);
         mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().is2xxSuccessful());
 
-        mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().is2xxSuccessful());
+        var path = BASE_PATH + "/" + id;
+        mockMvc.perform(deleteAction(path)).andExpect(status().is2xxSuccessful());
     }
 
     @Test
-    public void deleteAllTest() {
-        //TODO написать тест
+    public void deleteAllTest() throws Exception {
+
+        var id = 5L;
+        var recordsNumber = 10L;
+        Set<Long> ids = new HashSet<>();
+
+        for (long i = id; i < id + recordsNumber; i++) {
+            var organization = randomAlphabetic(1000);
+            var name = randomAlphabetic(1000);
+            var description = randomAlphabetic(1000);
+            var type = randomAlphabetic(1000);
+
+            var documentDto = new DocumentDto();
+            documentDto.setId(i);
+            documentDto.setOrganization(organization);
+            documentDto.setPatient(name);
+            documentDto.setType(type);
+            documentDto.setDescription(description);
+            mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().is2xxSuccessful());
+            ids.add(i);
+        }
+        var idsDto = new IdsDto();
+        idsDto.setIds(ids);
+        mockMvc.perform(deleteAction(BASE_PATH, idsDto)).andExpect(status().is2xxSuccessful());
     }
 
     private MockHttpServletRequestBuilder postAction(String uri, Object dto) throws JsonProcessingException {
@@ -123,7 +158,17 @@ public class DocumentControllerTest {
                 .content(mapper.writeValueAsString(dto));
     }
 
-    private MockHttpServletRequestBuilder getAction(String uri) throws JsonProcessingException {
+    private MockHttpServletRequestBuilder deleteAction(String uri, Object dto) throws JsonProcessingException {
+        return delete(uri)
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsString(dto));
+    }
+
+    private MockHttpServletRequestBuilder deleteAction(String uri) {
+        return delete(uri);
+    }
+
+    private MockHttpServletRequestBuilder getAction(String uri) {
         return get(uri);
     }
 }

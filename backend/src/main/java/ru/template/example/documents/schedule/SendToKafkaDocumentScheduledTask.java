@@ -9,6 +9,9 @@ import ru.template.example.documents.kafka.KafkaSender;
 
 import java.util.List;
 
+/**
+ * Периодическая отправка сообщений с документами в кафку
+ */
 @Component
 @AllArgsConstructor
 public class SendToKafkaDocumentScheduledTask {
@@ -18,9 +21,9 @@ public class SendToKafkaDocumentScheduledTask {
     private final MessageForKafkaRepository messageForKafkaRepository;
 
     @Scheduled(fixedRate = TIME_RATE)
-    public void sendMessagesToKafka(){
+    public void sendMessagesToKafka() {
         List<MessageForKafkaEntity> messages = messageForKafkaRepository.findBySendFalse();
-        messages.forEach((message) ->{
+        messages.forEach((message) -> {
             kafkaSender.sendMessage(message.getMessage(), message.getId().toString(), KAFKA_TOPIC_NAME);
             message.setSend(true);
             message.setAccepted(false);

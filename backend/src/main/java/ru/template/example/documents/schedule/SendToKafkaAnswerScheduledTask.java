@@ -9,6 +9,9 @@ import ru.template.example.documents.repository.MessageForKafkaAnswerRepository;
 
 import java.util.List;
 
+/**
+ * Периодическая отправка сообщений с ответами в кафку
+ */
 @Component
 @AllArgsConstructor
 public class SendToKafkaAnswerScheduledTask {

@@ -13,7 +13,6 @@ import ru.template.example.documents.controller.dto.AnswerDto;
 import ru.template.example.documents.controller.dto.DocumentDto;
 import ru.template.example.documents.entity.MessageForKafkaAnswerEntity;
 import ru.template.example.documents.repository.MessageForKafkaAnswerRepository;
-import ru.template.example.documents.repository.MessageForKafkaRepository;
 
 import java.util.UUID;
 
@@ -28,30 +27,44 @@ public class KafkaDocumentConsumer {
 
     /**
      * Метод слушает топик documents
+     *
      * @param message текст сообщения
-     * @param key ключ сообщения
-     * @throws JsonProcessingException
+     * @param key     ключ сообщения
+     * @throws JsonProcessingException если получен не коректный объект
      */
     @KafkaListener(topics = "documents", groupId = "group_id")
     public void consumer(@Payload String message,
                          @Header(KafkaHeaders.RECEIVED_KEY) String key
     ) throws JsonProcessingException {
         DocumentDto documentDto = objectMapper.readValue(message, DocumentDto.class);
+        checkMessageFromKafkaAnswer(UUID.fromString(key));
         AnswerDto answerDto = new AnswerDto(documentDto.getId(), "ACCEPTED");
         MessageForKafkaAnswerEntity messageForKafkaAnswer
                 = prepareMessageEntity(UUID.fromString(key), answerDto);
         messageForKafkaAnswerRepository.save(messageForKafkaAnswer);
     }
 
-    private void checkMessageForKafkaAnswer(UUID id){
+    /**
+     * Проверка было ли принято данное сообщение
+     *
+     * @param id идшник сообщения
+     */
+    private void checkMessageFromKafkaAnswer(UUID id) {
         var message = messageForKafkaAnswerRepository.findById(id);
-        if(message.isPresent()){
+        if (message.isPresent()) {
             throw new KafkaException("Problem with message");
         }
     }
-    private MessageForKafkaAnswerEntity prepareMessageEntity(UUID key, AnswerDto answerDto) {
+
+    /**
+     * Подготовка записи для ответного сообщения
+     * @param id идентификатор сообщения
+     * @param answerDto объект для передачи через сообщение
+     * @return сообщения для записи в БД
+     */
+    private MessageForKafkaAnswerEntity prepareMessageEntity(UUID id, AnswerDto answerDto) {
         MessageForKafkaAnswerEntity messageForKafkaAnswer = new MessageForKafkaAnswerEntity();
-        messageForKafkaAnswer.setId(key);
+        messageForKafkaAnswer.setId(id);
         messageForKafkaAnswer.setSend(false);
         try {
             String json = objectMapper.writeValueAsString(answerDto);

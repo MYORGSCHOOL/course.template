@@ -8,6 +8,9 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Сущность для отправки ответов на сообщения из кафки
+ */
 @Getter
 @Setter
 @Entity

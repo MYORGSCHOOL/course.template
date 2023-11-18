@@ -49,12 +49,21 @@ public class KafkaAnswerConsumer {
         messageForKafkaRepository.updateAcceptedById(true, messageForKafka.get().getId());
     }
 
+    /**
+     *  Метод для обновления документов в БД
+     * @param answerDto
+     */
     private void updateDocument(AnswerDto answerDto) {
         DocumentDto documentDto = documentService.get(answerDto.getId());
         documentDto.setStatus(getStatusForDocument(answerDto.getStatus()));
         documentService.update(documentDto);
     }
 
+    /**
+     * Метод для установки статуса у документа
+     * @param statusFromMessage строка со статусом из сообщения
+     * @return Статус
+     */
     private Status getStatusForDocument(String statusFromMessage) {
         if (statusFromMessage.equals("ACCEPTED")) {
             return new Status("ACCEPTED", "Принят");

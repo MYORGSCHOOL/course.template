@@ -10,10 +10,11 @@ import javax.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
+/**
+ * Сущность для отправки документов сообщением в кафку
+ */
+@Getter
+@Setter
 @Entity
 @Table(name = "message_for_kafka")
 public class MessageForKafkaEntity {
