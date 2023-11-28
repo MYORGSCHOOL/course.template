@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 @Component
 @AllArgsConstructor
-public class kafkaSender {
+public class KafkaSender {
 
     private final KafkaTemplate<Long, DocumentDto> kafkaTemplate;
 

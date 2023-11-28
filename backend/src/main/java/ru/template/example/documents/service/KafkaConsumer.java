@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class kafkaConsumer {
+public class KafkaConsumer {
     private final ObjectMapper objectMapper;
     private final DocumentRepository documentRepository;
     private final StatusRepository statusRepository;

@@ -29,7 +29,7 @@ import java.util.Set;
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final StatusRepository statusRepository;
-    private final kafkaSender kafkaSender;
+    private final KafkaSender kafkaSender;
 
     private final MapperFacade mapperFacade = new DefaultMapperFactory
             .Builder()
