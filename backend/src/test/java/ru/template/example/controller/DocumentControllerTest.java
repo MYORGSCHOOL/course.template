@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@ExtendWith({ SpringExtension.class, MockitoExtension.class })
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class DocumentControllerTest {
     private static final String BASE_PATH = "/documents";
     private final ObjectMapper mapper = new JacksonConfiguration().objectMapper();
@@ -116,6 +116,7 @@ public class DocumentControllerTest {
         documentDto.setStatus(Status.of("2", "IN_PROCESS"));
         mockMvc.perform(postAction(BASE_PATH, documentDto)).andExpect(status().isOk());
     }
+
     @Test
     public void deleteTest() throws Exception {
         Long id = 1L;
@@ -136,7 +137,8 @@ public class DocumentControllerTest {
                 .contentType(APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto));
     }
-   private MockHttpServletRequestBuilder deleteAction(String uri, Object dto) throws JsonProcessingException {
+
+    private MockHttpServletRequestBuilder deleteAction(String uri, Object dto) throws JsonProcessingException {
         return delete(uri)
                 .contentType(APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto));

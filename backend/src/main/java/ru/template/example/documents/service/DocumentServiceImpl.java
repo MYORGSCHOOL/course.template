@@ -46,7 +46,7 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentDto save(DocumentDto documentDto) {
         DocumentsEntity document = mapperFacade.map(documentDto, DocumentsEntity.class);
         Optional<StatusEntity> status = statusRepository.findByCode("NEW");
-        document.setStatus(status.orElseThrow(()->new NotFoundStatus("Статус не найден")));
+        document.setStatus(status.orElseThrow(() -> new NotFoundStatus("Статус не найден")));
         document.setDate(Date.from(Instant.now()));
         documentRepository.save(document);
         return mapperFacade.map(document, DocumentDto.class);
@@ -68,7 +68,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         kafkaSender.sendMessage(documentDto);
         Optional<StatusEntity> status = statusRepository.findByCode("IN_PROCESS");
-        documentRepository.updateStatusById(status.orElseThrow(()->new NotFoundStatus("Статус не найден")), documentDto.getId());
+        documentRepository.updateStatusById(status.orElseThrow(() -> new NotFoundStatus("Статус не найден")), documentDto.getId());
         return documentDto;
     }
 
@@ -112,6 +112,6 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentDto get(Long id) {
         Optional<DocumentsEntity> document = documentRepository.findById(id);
-        return mapperFacade.map(document.orElseThrow(()->new DocumentNotFoundException("Документ не найден.")), DocumentDto.class);
+        return mapperFacade.map(document.orElseThrow(() -> new DocumentNotFoundException("Документ не найден.")), DocumentDto.class);
     }
 }

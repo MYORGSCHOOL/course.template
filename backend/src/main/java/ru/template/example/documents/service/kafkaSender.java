@@ -24,7 +24,7 @@ public class kafkaSender {
     public void sendMessage(DocumentDto message) {
 
         ListenableFuture<SendResult<Long, DocumentDto>> future =
-                kafkaTemplate.send("documentsIn",message);
+                kafkaTemplate.send("documentsIn", message);
         future.addCallback(new ListenableFutureCallback<>() {
             @Override
             public void onFailure(Throwable ex) {

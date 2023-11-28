@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DocumentServiceImplTest {
     @Autowired
     private DocumentServiceImpl documentService;
+
     @Test
     public void saveGetTest() {
         DocumentDto documentDto = new DocumentDto(
@@ -38,10 +39,10 @@ public class DocumentServiceImplTest {
         documentService.save(documentDto);
 
         assertEquals(1, documentDto.getId());
-        assertEquals("type",documentDto.getType());
-        assertEquals("organization",documentDto.getOrganization());
-        assertEquals("description",documentDto.getDescription());
-        assertEquals("patient",documentDto.getPatient());
+        assertEquals("type", documentDto.getType());
+        assertEquals("organization", documentDto.getOrganization());
+        assertEquals("description", documentDto.getDescription());
+        assertEquals("patient", documentDto.getPatient());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class DocumentServiceImplTest {
                 "description",
                 "patient",
                 Date.from(Instant.now()),
-                Status.of("1", "NEW")) ;
+                Status.of("1", "NEW"));
         documentService.save(documentDto);
 
         documentDto.setDescription("test");
@@ -71,7 +72,7 @@ public class DocumentServiceImplTest {
                 "description",
                 "patient",
                 Date.from(Instant.now()),
-                Status.of("1", "NEW")) ;
+                Status.of("1", "NEW"));
         documentService.save(documentDto);
 
         documentService.delete(3L);
@@ -87,7 +88,7 @@ public class DocumentServiceImplTest {
                 "description",
                 "patient",
                 Date.from(Instant.now()),
-               Status.of("1", "NEW"));
+                Status.of("1", "NEW"));
         DocumentDto documentDto1 = new DocumentDto(
                 5L,
                 "type",
@@ -104,7 +105,7 @@ public class DocumentServiceImplTest {
 
     @Test
     void findAll() {
-       Map<Long, DocumentDto> allDocumentMap = documentService.findAll()
+        Map<Long, DocumentDto> allDocumentMap = documentService.findAll()
                 .stream()
                 .collect(Collectors.toMap(DocumentDto::getId, Function.identity()));
         assertEquals(2, allDocumentMap.size());

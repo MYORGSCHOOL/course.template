@@ -30,6 +30,7 @@ public class DocumentController {
     public List<DocumentDto> get() {
         return service.findAll();
     }
+
     @PostMapping(
             path = "send",
             consumes = MediaType.APPLICATION_JSON_VALUE,

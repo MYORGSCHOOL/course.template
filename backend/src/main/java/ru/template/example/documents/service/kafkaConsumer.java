@@ -32,6 +32,6 @@ public class kafkaConsumer {
     public void consume(@Payload String message) throws JsonProcessingException {
         KafkaResultDto resultDto = objectMapper.readValue(message, KafkaResultDto.class);
         Optional<StatusEntity> status = statusRepository.findByCode(resultDto.getStatus());
-        documentRepository.updateStatusById(status.orElseThrow(()->new NotFoundStatus("Статус не найден")), resultDto.getId());
+        documentRepository.updateStatusById(status.orElseThrow(() -> new NotFoundStatus("Статус не найден")), resultDto.getId());
     }
 }
